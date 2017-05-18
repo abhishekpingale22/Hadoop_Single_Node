@@ -1,0 +1,328 @@
+#Single Node Cluster
+
+sudo apt-get update
+sudo apt-get install openjdk-7-jre
+https://archive.apache.org/dist/hadoop/common/hadoop-1.2.1/hadoop-1.2.1.tar.gz
+tar -zxvf hadoop-1.2.1.tar.gz
+du -h hadoop-1.2.1.tar.gz
+whereis hadoop
+cd hadoop-1.2.1/bin/
+./hadoop ->here is hadoop will start , but it is not configured.
+cd
+sudo mv hadoop-1.2.1 /usr/local/hadoop 
+whereis hadoop
+echo $PATH
+
+---------------------------**configuring bashrc linux env setup-START**---------------
+nano ~/.bashrc
+export HADOOP_PREFIX=/usr/local/hadoop/
+export PATH=$PATH:$HADOOP_PREFIX/bin
+export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
+export PATH=$PATH:$JAVA_HOME
+---------------------------**configuring bashrc linux env setup-END**---------------
+bash ->reload the .bashrc file changes to reflect changes made
+echo $PATH -> to check /usr/local/hadoop/bin and /usr/lib/jvm/java-7-openjdk-amd64 is present in environment $PATH.
+whereis jvm
+cd java-7-openjdk-amd64/ ->to Check JVM PATH to Set for environment variable(OracleJDK,AzulJDK,IBMJDK,OpenJDK)
+cd
+
+----**setting hadoop env-START**------
+nano /usr/local/hadoop/conf/hadoop-env.sh
+export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
+export HADOOP_OPTS=-Djava.net.preferIPV4Stack=true
+----**setting hadoop env-END**------
+
+-------**configuring xml's-START**------
+nano /usr/local/hadoop/conf/core-site.xml
+<property>
+<name>fs.default.name</name>
+<value>hdfs://master.example.com:9000</value>
+</property>
+
+<property>
+<name>hadoop.tmp.dir</name>
+<value>/usr/local/hadoop/tmp</value>
+</property>
+
+nano /usr/local/hadoop/conf/hdfs-site.xml
+<property>
+<name>dfs.replication</name>
+<value>1</value>
+</property>
+
+nano /usr/local/hadoop/conf/mapred-site.xml
+<property>
+<name>mapred.job.tracker</name>
+<value>hdfs://master.example.com:9001</value>
+</property>
+-------**configuring xml's-END**------
+
+hadoop namenode -format ->this will give ouput below
+#To ensure fsimage is the File System of Hadoop, and FSEditLog...
+#if backup needs to be taken, take backup of fsimage and editlogs
+#Namenode is PHYSICAL DAEMON , after the "hadoop namenode -format" is executed, the /tmp directory #has /dfs directory created.
+#the mapreduce is LOGICAL, it is created only when data is processed.
+
+17/05/14 12:34:44 INFO namenode.NameNode: STARTUP_MSG: 
+/************************************************************
+STARTUP_MSG: Starting NameNode
+STARTUP_MSG:   host = ip-172-31-33-164/172.31.33.164
+STARTUP_MSG:   args = [-format]
+STARTUP_MSG:   version = 1.2.1
+STARTUP_MSG:   build = https://svn.apache.org/repos/asf/hadoop/common/branches/branch-1.2 -r 1503152; compiled by 'mattf' on Mon Jul 22 15:23:09 PDT 2013
+STARTUP_MSG:   java = 1.7.0_121
+************************************************************/
+17/05/14 12:34:44 INFO util.GSet: Computing capacity for map BlocksMap
+17/05/14 12:34:44 INFO util.GSet: VM type       = 64-bit
+17/05/14 12:34:44 INFO util.GSet: 2.0% max memory = 1013645312
+17/05/14 12:34:44 INFO util.GSet: capacity      = 2^21 = 2097152 entries
+17/05/14 12:34:44 INFO util.GSet: recommended=2097152, actual=2097152
+17/05/14 12:34:44 INFO namenode.FSNamesystem: fsOwner=ubuntu
+17/05/14 12:34:44 INFO namenode.FSNamesystem: supergroup=supergroup
+17/05/14 12:34:44 INFO namenode.FSNamesystem: isPermissionEnabled=true
+17/05/14 12:34:44 INFO namenode.FSNamesystem: dfs.block.invalidate.limit=100
+17/05/14 12:34:44 INFO namenode.FSNamesystem: isAccessTokenEnabled=false accessKeyUpdateInterval=0 min(s), accessTokenLifetime=0 min(s)
+17/05/14 12:34:44 INFO namenode.FSEditLog: dfs.namenode.edits.toleration.length = 0
+17/05/14 12:34:44 INFO namenode.NameNode: Caching file names occuring more than 10 times 
+
+17/05/14 12:34:44 INFO common.Storage: Image file /usr/local/hadoop/tmp/dfs/name/current/fsimage of size 112 bytes saved in 0 seconds.
+17/05/14 12:34:44 INFO namenode.FSEditLog: closing edit log: position=4, editlog=/usr/local/hadoop/tmp/dfs/name/current/edits
+17/05/14 12:34:44 INFO namenode.FSEditLog: close success: truncate to 4, editlog=/usr/local/hadoop/tmp/dfs/name/current/edits
+
+17/05/14 12:34:44 INFO common.Storage: Storage directory /usr/local/hadoop/tmp/dfs/name has been successfully formatted.
+17/05/14 12:34:44 INFO namenode.NameNode: SHUTDOWN_MSG: 
+/************************************************************
+SHUTDOWN_MSG: Shutting down NameNode at ip-172-31-33-164/172.31.33.164
+************************************************************/
+
+cd /usr/local/hadoop/tmp/
+cd /usr/local/hadoop/tmp/dfs/name/current
+cat VERSION
+#Sun May 14 12:34:44 UTC 2017
+namespaceID=2139361316
+cTime=0
+storageType=NAME_NODE
+layoutVersion=-41
+
+
+ls /usr/local/hadoop/tmp/dfs ->this will only have "name" directory created.
+
+#Check where is start-dfs.sh file is located.
+start-dfs.sh
+starting namenode, logging to /usr/local/hadoop/libexec/../logs/hadoop-ubuntu-namenode-ip-172-31-33-164.out
+The authenticity of host 'localhost (127.0.0.1)' can't be established.
+ECDSA key fingerprint is a6:09:f2:3f:1c:39:48:26:92:24:f7:17:83:04:09:f9.
+Are you sure you want to continue connecting (yes/no)? yes
+localhost: Warning: Permanently added 'localhost' (ECDSA) to the list of known hosts.
+localhost: Permission denied (publickey).
+localhost: Permission denied (publickey).
+
+#This means there is no localhost (key present in ~/.ssh/authorized_keys file)
+#in ~/.ssh/ directory
+ssh-keygen -t rsa
+cat authorized_keys
+cat id_rsa.pub
+cat id_rsa.pub >> authorized_keys  ->append the Public key of Server to authorized_keys file
+cat authorized_keys
+
+
+start-dfs.sh
+namenode running as process 8364. Stop it first.
+localhost: starting datanode, logging to /usr/local/hadoop/libexec/../logs/hadoop-ubuntu-datanode-ip-172-31-33-164.out
+localhost: starting secondarynamenode, logging to /usr/local/hadoop/libexec/../logs/hadoop-ubuntu-secondarynamenode-ip-172-31-33-164.out
+
+ls /usr/local/hadoop/tmp/dfs ->this will have directories "/data","/name","/namesecondary"
+
+
+cd /usr/local/hadoop/tmp/dfs/data/current
+cat VERSION
+#Sun May 14 13:13:17 UTC 2017
+namespaceID=2139361316
+storageID=DS-1535964772-172.31.33.164-50010-1494767597427
+cTime=0
+storageType=DATA_NODE
+layoutVersion=-41
+#Here the Namenode and Datanode has the same namespaceID=2139361316
+#the data can be written, however the LOGICAL read is not running for now.
+
+#Below we start the LOGICAL
+start-mapred.sh 
+starting jobtracker, logging to /usr/local/hadoop/libexec/../logs/hadoop-ubuntu-jobtracker-ip-172-31-33-164.out
+localhost: starting tasktracker, logging to /usr/local/hadoop/libexec/../logs/hadoop-ubuntu-tasktracker-ip-172-31-33-164.out
+
+ls /usr/local/hadoop/tmp
+#The /mapred directory is created as LOGICAL is running
+
+cd
+#return the HOME directory
+
+nano s_node_test
+This is Hadoop Tutorial on AWS EC2.
+
+df -h s_node_test
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/xvda1      7.8G  1.4G  6.0G  19% /
+
+lsblk
+NAME    MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+xvda    202:0    0   8G  0 disk 
+└─xvda1 202:1    0   8G  0 part /
+
+lscpu
+Architecture:          x86_64
+CPU op-mode(s):        32-bit, 64-bit
+Byte Order:            Little Endian
+CPU(s):                1
+On-line CPU(s) list:   0
+Thread(s) per core:    1
+Core(s) per socket:    1
+Socket(s):             1
+NUMA node(s):          1
+Vendor ID:             GenuineIntel
+CPU family:            6
+Model:                 63
+Stepping:              2
+CPU MHz:               2400.020
+BogoMIPS:              4800.04
+Hypervisor vendor:     Xen  ->AWS uses XEN Servers
+Virtualization type:   full
+L1d cache:             32K
+L1i cache:             32K
+L2 cache:              256K
+L3 cache:              30720K
+NUMA node0 CPU(s):     0
+
+
+hadoop fs -put s_node_test .
+
+#Before the above command
+#In Browser open the link
+54.83.163.26:50070   ->Hadoop Administration Port by Apache. 
+Hadoop 1- 64MB - Default
+Hadoop 2- 128MB - Default
+Hadoop 3- 256MB - Default
+#Check the Security group of EC2 , Add a rule in Inbound as "All Traffic" and F5
+
+cd /usr/local/hadoop/tmp/dfs/data/current
+ls ->The blocks that are written on Hadoop
+blk_8837400561148059688            blk_97505266042099869_1002.meta
+blk_8837400561148059688_1001.meta  dncp_block_verification.log.curr
+blk_97505266042099869              VERSION
+
+ls --inode
+#To get inode associated with each block
+
+cat blk_97505266042099869
+This is Hadoop Tutorial ->Content of Block
+#When the Block data is readable , Hadoop is not secure, this block data should be encrypted.
+
+***Processing Data on Hadoop-START ***
+export CLASSPATH=/usr/local/hadoop/hadoop-core-1.2.1.jar
+
+mkdir wordcount_classes
+
+javac -d wordcount_classes/ WordCount.java
+#OpenJDK needs to be installed 
+sudo apt-get install openjdk-7-jdk
+
+javac -d wordcount_classes/ WordCount.java
+#The Classes are created in directory /wordcount_classes
+#We have to create a JAR file for the below classes.
+WordCount.class  WordCount$Map.class  WordCount$Reduce.class
+
+jar -cvf wordcount.jar -C wordcount_classes/ .
+#-cvf -> create|verbose|forcefully
+#-C wordcount_classes/ -> this will check the classes in the specified dir.
+# . ->The "." is given to specify that, create the JAR file and place in the current directory
+
+hadoop jar  ->Check arguments needed
+#RunJar jarFile [mainClass] args...
+#RunJar -> The JAR file what we created
+[mainClass] -> The Main Class name in the JAVA file
+args... ->Input(args[0]) and Output(args[1]) 
+
+hadoop jar wordcount.jar WordCount s_node_test output
+17/05/14 16:26:22 WARN mapred.JobClient: Use GenericOptionsParser for parsing the arguments. Applications should implement Tool for the same.
+17/05/14 16:26:22 INFO util.NativeCodeLoader: Loaded the native-hadoop library
+17/05/14 16:26:22 WARN snappy.LoadSnappy: Snappy native library not loaded
+17/05/14 16:26:22 INFO mapred.FileInputFormat: Total input paths to process : 1
+17/05/14 16:26:23 INFO mapred.JobClient: Running job: job_201705141322_0001
+17/05/14 16:26:24 INFO mapred.JobClient:  map 0% reduce 0%
+17/05/14 16:26:32 INFO mapred.JobClient:  map 100% reduce 0%
+17/05/14 16:26:41 INFO mapred.JobClient:  map 100% reduce 33%
+17/05/14 16:26:42 INFO mapred.JobClient:  map 100% reduce 100%
+17/05/14 16:26:43 INFO mapred.JobClient: Job complete: job_201705141322_0001
+17/05/14 16:26:43 INFO mapred.JobClient: Counters: 30
+17/05/14 16:26:43 INFO mapred.JobClient:   Job Counters 
+17/05/14 16:26:43 INFO mapred.JobClient:     Launched reduce tasks=1
+17/05/14 16:26:43 INFO mapred.JobClient:     SLOTS_MILLIS_MAPS=12431
+17/05/14 16:26:43 INFO mapred.JobClient:     Total time spent by all reduces waiting after reserving slots (ms)=0
+17/05/14 16:26:43 INFO mapred.JobClient:     Total time spent by all maps waiting after reserving slots (ms)=0
+17/05/14 16:26:43 INFO mapred.JobClient:     Launched map tasks=2
+17/05/14 16:26:43 INFO mapred.JobClient:     Data-local map tasks=2
+17/05/14 16:26:43 INFO mapred.JobClient:     SLOTS_MILLIS_REDUCES=9528
+17/05/14 16:26:43 INFO mapred.JobClient:   File Input Format Counters 
+17/05/14 16:26:43 INFO mapred.JobClient:     Bytes Read=38
+17/05/14 16:26:43 INFO mapred.JobClient:   File Output Format Counters 
+17/05/14 16:26:43 INFO mapred.JobClient:     Bytes Written=32
+17/05/14 16:26:43 INFO mapred.JobClient:   FileSystemCounters
+17/05/14 16:26:43 INFO mapred.JobClient:     FILE_BYTES_READ=54
+17/05/14 16:26:43 INFO mapred.JobClient:     HDFS_BYTES_READ=234
+17/05/14 16:26:43 INFO mapred.JobClient:     FILE_BYTES_WRITTEN=168829
+17/05/14 16:26:43 INFO mapred.JobClient:     HDFS_BYTES_WRITTEN=32
+17/05/14 16:26:43 INFO mapred.JobClient:   Map-Reduce Framework
+17/05/14 16:26:43 INFO mapred.JobClient:     Map output materialized bytes=60
+17/05/14 16:26:43 INFO mapred.JobClient:     Map input records=1
+17/05/14 16:26:43 INFO mapred.JobClient:     Reduce shuffle bytes=60
+17/05/14 16:26:43 INFO mapred.JobClient:     Spilled Records=8
+17/05/14 16:26:43 INFO mapred.JobClient:     Map output bytes=40
+17/05/14 16:26:43 INFO mapred.JobClient:     Total committed heap usage (bytes)=336404480
+17/05/14 16:26:43 INFO mapred.JobClient:     CPU time spent (ms)=1070
+17/05/14 16:26:43 INFO mapred.JobClient:     Map input bytes=25
+17/05/14 16:26:43 INFO mapred.JobClient:     SPLIT_RAW_BYTES=196
+17/05/14 16:26:43 INFO mapred.JobClient:     Combine input records=0
+17/05/14 16:26:43 INFO mapred.JobClient:     Reduce input records=4
+17/05/14 16:26:43 INFO mapred.JobClient:     Reduce input groups=4
+17/05/14 16:26:43 INFO mapred.JobClient:     Combine output records=0
+17/05/14 16:26:43 INFO mapred.JobClient:     Physical memory (bytes) snapshot=409116672
+17/05/14 16:26:43 INFO mapred.JobClient:     Reduce output records=4
+17/05/14 16:26:43 INFO mapred.JobClient:     Virtual memory (bytes) snapshot=2251440128
+17/05/14 16:26:43 INFO mapred.JobClient:     Map output records=4
+
+
+#This command will give the Path of data processed.
+hadoop fs -lsr  
+drwxr-xr-x   - ubuntu supergroup          0 2017-05-14 16:26 /user/ubuntu/output
+-rw-r--r--   1 ubuntu supergroup          0 2017-05-14 16:26 /user/ubuntu/output/_SUCCESS
+drwxr-xr-x   - ubuntu supergroup          0 2017-05-14 16:26 /user/ubuntu/output/_logs
+drwxr-xr-x   - ubuntu supergroup          0 2017-05-14 16:26 /user/ubuntu/output/_logs/history
+-rw-r--r--   1 ubuntu supergroup      16782 2017-05-14 16:26 /user/ubuntu/output/_logs/history/job_201705141322_0001_1494779183161_ubuntu_wordcount
+-rw-r--r--   1 ubuntu supergroup      48610 2017-05-14 16:26 /user/ubuntu/output/_logs/history/job_201705141322_0001_conf.xml
+-rw-r--r--   1 ubuntu supergroup         32 2017-05-14 16:26 /user/ubuntu/output/part-00000
+-rw-r--r--   1 ubuntu supergroup         25 2017-05-14 15:12 /user/ubuntu/s_node_test
+#copy the output/part-00000 path to check out of data processed.
+
+hadoop fs -cat /user/ubuntu/output/part-00000
+Hadoop	1
+This	1
+Tutorial	1
+is	1
+
+jps  ->
+8876 SecondaryNameNode
+8996 JobTracker
+9165 TaskTracker
+8706 DataNode
+8364 NameNode
+22004 Jps
+
+
+
+
+
+
+
+
+
+
+
