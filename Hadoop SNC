@@ -57,7 +57,7 @@ nano /usr/local/hadoop/conf/mapred-site.xml
 </property>
 -------**configuring xml's-END**------
 
-hadoop namenode -format ->this will give ouput below
+hadoop namenode -format ->this will give output below
 #To ensure fsimage is the File System of Hadoop, and FSEditLog...
 #if backup needs to be taken, take backup of fsimage and editlogs
 #Namenode is PHYSICAL DAEMON , after the "hadoop namenode -format" is executed, the /tmp directory #has /dfs directory created.
@@ -307,6 +307,8 @@ Hadoop	1
 This	1
 Tutorial	1
 is	1
+
+The above output gives the word count of input file.
 
 jps  ->
 8876 SecondaryNameNode
