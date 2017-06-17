@@ -1,7 +1,7 @@
 #Single Node Cluster
 
 sudo apt-get update
-sudo apt-get install openjdk-7-jre
+sudo apt-get install openjdk-7-jre -y
 wget https://archive.apache.org/dist/hadoop/common/hadoop-1.2.1/hadoop-1.2.1.tar.gz ->Download hadoop-1.2.1
 tar -zxvf hadoop-1.2.1.tar.gz   ->-zxvf => Extract Verbose Forcefully
 du -h hadoop-1.2.1.tar.gz    -> To check the file size before and after extract.
